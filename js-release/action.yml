@@ -1,0 +1,52 @@
+name: Release a JS package to npm & Manifold JS CDN
+author: manifoldco
+description: |-
+  Publishes a semver package to npm and Manifold’s JS CDN
+  (https://js.cdn.manifold.co)
+inputs:
+  package_name:
+    description: |-
+      The full npm package name (e.g. `@manifoldco/manifold-init`)
+    required: true
+
+  semver:
+    description: |-
+      Semver of the package, without `v` prefix (e.g. `1.2.3`)
+    required: true
+
+  workspace:
+    description: |-
+      The directory of the files to publish to npm and GCP
+    required: true
+
+  npm_dist_tag:
+    description: |-
+      The distribution tag for npm (e.g. `latest`)
+    default: next
+    required: false
+
+  npm_token:
+    description: |-
+      A token with write access to publish the npm package
+    required: true
+
+  export_default_credentials:
+    description: |-
+      Export the provided credentials as Google Default Application
+      Credentials. This will make the credentials available to later steps
+      via the GOOGLE_APPLICATION_CREDENTIALS environment variable. Future
+      steps that consume Default Application Credentials will automatically
+      detect and use these credentials.
+    default: false
+    required: false
+
+  service_account_key:
+    description: |-
+      Service account key to use for authentication. This should be the JSON
+      formatted private key which can be exported from the Cloud Console. The
+      value can be raw or base64-encoded.
+    required: true
+
+runs:
+  using: node12
+  main: dist/index.js
