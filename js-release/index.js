@@ -13,7 +13,7 @@ const exec = (str) => process.stdout.write(execSync(str));
 const get = bent('json', process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.org/');
 
 // Event information from the current workflow
-const event = JSON.parse(fs.readFileSync('/github/workflow/event.json').toString());
+const event = JSON.parse(fs.readFileSync('/github/workflow/event.json', 'utf8').toString());
 
 // eslint-disable-next-line import/no-dynamic-require
 const pkg = require(path.join(process.cwd(), 'package.json'));
@@ -83,7 +83,7 @@ const run = async () => {
   // Update NPM version in package.json
   const current = execSync(`npm view ${pkg.name} version`).toString();
   exec(`npm version --allow-same-version=true --git-tag-version=false ${current} `);
-  console.log('current:', current, '/', 'version:', version);
+  console.log('current: ', current, ' / ', 'version: ', version);
   const newVersion = execSync(`npm version --git-tag-version=false ${version}`).toString();
   console.log('new version:', newVersion);
 
@@ -95,7 +95,7 @@ const run = async () => {
   exec(`echo "::set-output name=version::${newVersion}"`);
 
   // Publish changes to package.json to GitHub
-  await git.commit(`package.json update for ${newVersion}`);
+  await git.commit(newVersion);
   await git.push(remoteName);
   await git.pushTags(remoteName);
 };
