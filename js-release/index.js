@@ -42,12 +42,8 @@ const prepareNPMConfig = async () => {
 
 // Function that will extract the current version info from the recent commits
 const extractVersion = async (pkg) => {
-  let latest;
-  try {
-    latest = await get(`${pkg.name}/latest`.replace('%2f', '/'));
-  } catch (e) {
-    // unpublished
-  }
+  console.log(`${pkg.name}/latest`.replace('%2f', '/'));
+  let latest = await get(`${pkg.name}/latest`.replace('%2f', '/'));
 
   let messages;
 
