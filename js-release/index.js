@@ -19,9 +19,6 @@ const get = bent('json', registeryURL);
 // Event information from the current workflow
 const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8').toString());
 
-// eslint-disable-next-line import/no-dynamic-require
-const pkg = require(path.join(process.cwd(), 'package.json'));
-
 // Function that prepares the NPM local config for the deployment if the token is set.
 const prepareNPMConfig = async () => {
   if (process.env.NPM_TOKEN) {
@@ -44,7 +41,7 @@ const prepareNPMConfig = async () => {
 };
 
 // Function that will extract the current version info from the recent commits
-const extractVersion = async () => {
+const extractVersion = async (pkg) => {
   let latest;
   try {
     latest = await get(`${pkg.name}/latest`);
@@ -91,6 +88,7 @@ const run = async () => {
   try {
     await prepareNPMConfig();
 
+    const directory = input.npm_publish_directory || '';
     const remoteName = 'releaser';
     const githubActor = process.env.GITHUB_ACTOR;
     const githubToken = process.env.GITHUB_TOKEN;
@@ -99,6 +97,16 @@ const run = async () => {
     // Get the path to the remote repo for acting there
     const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${githubRepo}.git`;
 
+    const pkgPath = path.join(
+      process.env.GITHUB_WORKSPACE,
+      process.env.GITHUB_REPOSITORY,
+      directory,
+      'package.json'
+    );
+    console.log(pkgPath);
+    // eslint-disable-next-line import/no-dynamic-require,global-require
+    const pkg = require(pkgPath);
+
     // Setup git for the push
     await git.addConfig('http.sslVerify', false);
     await git.addConfig('user.name', 'Auto-Releaser');
@@ -106,7 +114,7 @@ const run = async () => {
 
     await git.addRemote(remoteName, remoteRepo);
 
-    const version = await extractVersion();
+    const version = await extractVersion(pkg);
 
     // Update NPM version in package.json
     const current = execSync(`npm view ${pkg.name} version`).toString();
@@ -116,7 +124,7 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
-    exec(`npm publish ${input.npm_publish_directory ? input.npm_publish_directory : ''}`);
+    exec(`npm publish ${directory}`);
 
     // Publish tag to GitHub
     await git.addTag(newVersion);

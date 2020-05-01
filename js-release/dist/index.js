@@ -2348,9 +2348,6 @@ const get = bent('json', registeryURL);
 // Event information from the current workflow
 const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8').toString());
 
-// eslint-disable-next-line import/no-dynamic-require
-const pkg = __webpack_require__(731);
-
 // Function that prepares the NPM local config for the deployment if the token is set.
 const prepareNPMConfig = async () => {
   if (process.env.NPM_TOKEN) {
@@ -2373,7 +2370,7 @@ const prepareNPMConfig = async () => {
 };
 
 // Function that will extract the current version info from the recent commits
-const extractVersion = async () => {
+const extractVersion = async (pkg) => {
   let latest;
   try {
     latest = await get(`${pkg.name}/latest`);
@@ -2420,6 +2417,7 @@ const run = async () => {
   try {
     await prepareNPMConfig();
 
+    const directory = input.npm_publish_directory || '';
     const remoteName = 'releaser';
     const githubActor = process.env.GITHUB_ACTOR;
     const githubToken = process.env.GITHUB_TOKEN;
@@ -2428,6 +2426,16 @@ const run = async () => {
     // Get the path to the remote repo for acting there
     const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${githubRepo}.git`;
 
+    const pkgPath = path.join(
+      process.env.GITHUB_WORKSPACE,
+      process.env.GITHUB_REPOSITORY,
+      directory,
+      'package.json'
+    );
+    console.log(pkgPath);
+    // eslint-disable-next-line import/no-dynamic-require,global-require
+    const pkg = require(pkgPath);
+
     // Setup git for the push
     await git.addConfig('http.sslVerify', false);
     await git.addConfig('user.name', 'Auto-Releaser');
@@ -2435,7 +2443,7 @@ const run = async () => {
 
     await git.addRemote(remoteName, remoteRepo);
 
-    const version = await extractVersion();
+    const version = await extractVersion(pkg);
 
     // Update NPM version in package.json
     const current = execSync(`npm view ${pkg.name} version`).toString();
@@ -2445,7 +2453,7 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
-    exec(`npm publish ${input.npm_publish_directory ? input.npm_publish_directory : ''}`);
+    exec(`npm publish ${directory}`);
 
     // Publish tag to GitHub
     await git.addTag(newVersion);
@@ -4566,13 +4574,6 @@ function statusTask() {
 }
 exports.statusTask = statusTask;
 //# sourceMappingURL=status.js.map
-
-/***/ }),
-
-/***/ 731:
-/***/ (function(module) {
-
-module.exports = {"name":"js-release","version":"0.0.1","description":"Actions to release NPM packages automatically, for free","main":"index.js","scripts":{"package":"ncc build index.js -o dist"},"husky":{"hooks":{"pre-commit":"npm run package && cd .. && git add js-release/dist/index.js"}},"repository":{"type":"git","url":"git+https://github.com/manifoldco/github-actions.git"},"keywords":["action","npm","releases"],"author":"manifoldco","license":"ISC","bugs":{"url":"https://github.com/manifoldco/github-actions/issues"},"homepage":"https://github.com/manifoldco/github-actions#readme","devDependencies":{"@zeit/ncc":"^0.22.1","eslint":"^6.8.0","eslint-config-airbnb-base":"^14.1.0","eslint-config-prettier":"^6.11.0","eslint-plugin-import":"^2.20.2","eslint-plugin-jsdoc":"^24.0.0","eslint-plugin-prettier":"^3.1.3","husky":"^4.2.5","prettier":"^2.0.5"},"dependencies":{"@actions/core":"^1.2.4","bent":"^7.3.0","simple-git":"^2.2.0"}};
 
 /***/ }),
 
