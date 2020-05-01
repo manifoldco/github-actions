@@ -3,7 +3,14 @@
   "version": "0.0.1",
   "description": "Actions to release NPM packages automatically, for free",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "package": "ncc build index.js -o dist"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run package && cd .. && git add js-release/dist/index.js"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/manifoldco/github-actions.git"
@@ -20,12 +27,14 @@
   },
   "homepage": "https://github.com/manifoldco/github-actions#readme",
   "devDependencies": {
+    "@zeit/ncc": "^0.22.1",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-jsdoc": "^24.0.0",
     "eslint-plugin-prettier": "^3.1.3",
+    "husky": "^4.2.5",
     "prettier": "^2.0.5"
   },
   "dependencies": {
