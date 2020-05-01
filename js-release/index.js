@@ -24,12 +24,12 @@ const prepareNPMConfig = async (token) => {
 
   npmStrict = npmStrict ? 'true' : 'false';
 
-  fs.writeFileSync(
+  /*fs.writeFileSync(
     npmUserConfig,
     `//${registeryURL}:_authToken=${token}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}\nalways-auth=true`
-  );
+  );*/
 
-  fs.chmodSync(npmUserConfig, '600');
+  //fs.chmodSync(npmUserConfig, '600');
   exec(`cat ${npmUserConfig}`);
 };
 
