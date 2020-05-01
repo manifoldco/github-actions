@@ -66,7 +66,6 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
-    execSync(`export NPM_TOKEN="${process.env.NPM_TOKEN}"`);
     exec(`npm publish ${directory}`);
 
     // Publish tag to GitHub
