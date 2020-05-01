@@ -2314,7 +2314,6 @@ const run = async () => {
     const pkgPath = path.join(process.env.GITHUB_WORKSPACE, directory, 'package.json');
     // eslint-disable-next-line import/no-dynamic-require,global-require
     const pkg = require(pkgPath);
-    exec(`cat ${pkgPath}`);
 
     // Setup git for the push
     await git.addConfig('http.sslVerify', false);
@@ -2338,6 +2337,7 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
+    execSync(`EXPORT NPM_TOKEN=${process.env.NPM_TOKEN}`);
     exec(`npm publish ${directory}`);
 
     // Publish tag to GitHub
