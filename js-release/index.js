@@ -24,7 +24,7 @@ const pkg = require(path.join(process.cwd(), 'package.json'));
 
 // Function that prepares the NPM local config for the deployment if the token is set.
 const prepareNPMConfig = async () => {
-  if (process.env.NPM_AUTH_TOKEN) {
+  if (process.env.NPM_TOKEN) {
     // If the token is not set, attempt to create a config file.
     // Respect NPM_CONFIG_USERCONFIG if it is provided, default to $HOME/.npmrc
 
@@ -36,7 +36,7 @@ const prepareNPMConfig = async () => {
 
     await fs.writeFile(
       npmUserConfig,
-      `${registeryURL}:_authToken=${process.env.NPM_AUTH_TOKEN}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}`
+      `${registeryURL}:_authToken=${process.env.NPM_TOKEN}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}`
     );
 
     await fs.chmod(npmUserConfig, '600');
