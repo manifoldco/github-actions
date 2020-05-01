@@ -20,6 +20,7 @@ const extractVersion = async (pkg) => {
   const response = await fetch(`${registryURL}${pkg.name}/latest`.replace('%2f', '/'), {
     headers: { Authorization: `Bearer ${process.env.NPM_TOKEN}` },
   });
+  console.log(response);
   let latest = await response.json();
 
   let messages;
