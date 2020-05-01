@@ -2410,7 +2410,7 @@ const run = async () => {
   };
 
   //try {
-    await prepareNPMConfig();
+    //await prepareNPMConfig();
 
     const directory = input.npm_publish_directory || '';
     const remoteName = 'releaser';
