@@ -8,5 +8,7 @@ inputs:
       The directory to publish within the workspace to NPM if the root directory is not valid. Omit to publish the root directory.
     required: false
 runs:
-  using: node12
-  main: index.js
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.npm_publish_directory }}
