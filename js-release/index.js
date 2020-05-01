@@ -1,13 +1,9 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const fetch = require('node-fetch');
 const git = require('simple-git/promise')();
 const { execSync } = require('child_process');
 const core = require('@actions/core');
-
-// URL for the NPM registry, configurable.
-const registryURL = process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.org/';
 
 // Utility method to write the result of execSync to the console.
 const exec = (str) => process.stdout.write(execSync(str));
@@ -16,33 +12,8 @@ const exec = (str) => process.stdout.write(execSync(str));
 const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8').toString());
 
 // Function that will extract the current version info from the recent commits
-const extractVersion = async (pkg) => {
-  const response = await fetch(`${registryURL}${pkg.name}/latest`.replace('%2f', '/'), {
-    headers: { Authorization: `Bearer ${process.env.NPM_TOKEN}` },
-  });
-  console.log(response);
-  let latest = await response.json();
-
-  let messages;
-
-  if (latest) {
-    if (latest.gitHead === process.env.GITHUB_SHA) {
-      return console.log('SHA matches latest release, skipping.');
-    }
-    if (latest.gitHead) {
-      try {
-        const logs = await git.log({ from: latest.gitHead, to: process.env.GITHUB_SHA });
-        messages = logs.all.map((r) => `${r.message}\n${r.body}`);
-      } catch (e) {
-        latest = null;
-      }
-    } else {
-      latest = null;
-    }
-  }
-  if (!latest) {
-    messages = (event.commits || []).map((commit) => `${commit.message}\n${commit.body}`);
-  }
+const extractVersion = async () => {
+  const messages = (event.commits || []).map((commit) => `${commit.message}\n${commit.body}`);
 
   let version = 'patch';
   if (messages.map((message) => message.includes('BREAKING CHANGE')).includes(true)) {
@@ -80,7 +51,7 @@ const run = async () => {
 
     await git.addRemote(remoteName, remoteRepo);
 
-    const version = await extractVersion(pkg);
+    const version = await extractVersion();
 
     // Move into the directory if necessary
     if (directory !== '') {
