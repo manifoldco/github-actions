@@ -2342,12 +2342,12 @@ const prepareNPMConfig = async (token) => {
 
   npmStrict = npmStrict ? 'true' : 'false';
 
-  /*fs.writeFileSync(
+  fs.writeFileSync(
     npmUserConfig,
     `//${registeryURL}:_authToken=${token}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}\nalways-auth=true`
-  );*/
+  );
 
-  //fs.chmodSync(npmUserConfig, '600');
+  fs.chmodSync(npmUserConfig, '600');
   exec(`cat ${npmUserConfig}`);
 };
 
@@ -2409,11 +2409,6 @@ const run = async () => {
     await git.addRemote(remoteName, remoteRepo);
 
     const version = await extractVersion();
-
-    // Move into the directory if necessary
-    if (directory !== '') {
-      execSync(`cd ${directory}`);
-    }
 
     // Update NPM version in package.json
     const current = execSync(`npm view ${pkg.name.replace('%2f', '/')} version`).toString();
