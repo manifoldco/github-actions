@@ -1,0 +1,12 @@
+name: Release a JS package to npm
+author: manifoldco
+description: |-
+  Publishes a semver package to npm, creates a github tag and updates package.json automatically when pushing to master.
+inputs:
+  npm_publish_directory:
+    description: |-
+      The directory to publish within the workspace to NPM if the root directory is not valid. Omit to publish the root directory.
+    required: false
+runs:
+  using: node12
+  main: dist/index.js

@@ -11,23 +11,24 @@ name: release
 
 on:
   push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+    branches:
+      - master
 
 jobs:
   js-release:
+    if: github.actor != 'dependabot@github.com'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
       - run: npm install
-      - run: npm run typecheck
       - run: make package
-      - uses: manifoldco/github-actions/js-release@master
+      - uses: manifoldco/github-actions/js-release@gui/npm-releases
         with:
-          npm_publish_directory: pkg # what directory should be published to npm
-      env:
-        NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+          npm_publish_directory: pkg
+    env:
+      NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+
 ```
 
 [makefile-example]: https://github.com/manifoldco/manifold-plan-table/blob/master/Makefile
