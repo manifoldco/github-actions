@@ -2337,38 +2337,16 @@ const { execSync } = __webpack_require__(4);
 const core = __webpack_require__(470);
 
 // URL for the NPM registry, configurable.
-const registeryURL = process.env.NPM_REGISTRY_URL || 'registry.npmjs.org/';
+const registeryURL = process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.org/';
 
 // Utility method to write the result of execSync to the console.
 const exec = (str) => process.stdout.write(execSync(str));
 
 // Utility method to get information as json from NPM
-const get = bent('json', `https://${registeryURL}`);
+const get = bent('json', registeryURL);
 
 // Event information from the current workflow
 const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8').toString());
-
-// Function that prepares the NPM local config for the deployment if the token is set.
-const prepareNPMConfig = async () => {
-  if (process.env.NPM_TOKEN) {
-    // If the token is not set, attempt to create a config file.
-    // Respect NPM_CONFIG_USERCONFIG if it is provided, default to $HOME/.npmrc
-    const npmUserConfig = process.env.NPM_CONFIG_USERCONFIG || `${os.homedir()}/.npmrc`;
-    let npmStrict = process.env.NPM_STRICT_SSL || true;
-    const npmRegistryScheme = npmStrict ? 'https' : 'http';
-
-    npmStrict = npmStrict ? 'true' : 'false';
-
-    console.log(npmUserConfig);
-    fs.writeFileSync(
-      npmUserConfig,
-      `${registeryURL}:_authToken=${process.env.NPM_TOKEN}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}`
-    );
-
-    fs.chmodSync(npmUserConfig, '600');
-    exec('cat ' + npmUserConfig);
-  }
-};
 
 // Function that will extract the current version info from the recent commits
 const extractVersion = async (pkg) => {
@@ -2411,8 +2389,6 @@ const run = async () => {
   };
 
   //try {
-    await prepareNPMConfig();
-
     const directory = input.npm_publish_directory || '';
     const remoteName = 'releaser';
     const githubActor = process.env.GITHUB_ACTOR;
