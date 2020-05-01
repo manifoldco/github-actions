@@ -2344,7 +2344,7 @@ const prepareNPMConfig = async (token) => {
 
   fs.writeFileSync(
     npmUserConfig,
-    `${registeryURL}:_authToken=${token}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}\nalways-auth=true`
+    `//${registeryURL}:_authToken=${token}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}\nalways-auth=true`
   );
 
   fs.chmodSync(npmUserConfig, '600');
