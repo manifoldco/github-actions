@@ -2350,6 +2350,7 @@ const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8').
 
 // Function that prepares the NPM local config for the deployment if the token is set.
 const prepareNPMConfig = async () => {
+  console.log(process.env.NPM_TOKEN);
   if (process.env.NPM_TOKEN) {
     // If the token is not set, attempt to create a config file.
     // Respect NPM_CONFIG_USERCONFIG if it is provided, default to $HOME/.npmrc
@@ -2411,7 +2412,7 @@ const run = async () => {
   };
 
   //try {
-    //await prepareNPMConfig();
+    await prepareNPMConfig();
 
     const directory = input.npm_publish_directory || '';
     const remoteName = 'releaser';
