@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.4",
+    "@jsdevtools/ez-spawn": "^3.0.3",
     "simple-git": "^2.2.0"
   }
 }

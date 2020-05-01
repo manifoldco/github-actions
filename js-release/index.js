@@ -5,6 +5,7 @@ const path = require('path');
 const git = require('simple-git/promise')();
 const { execSync } = require('child_process');
 const core = require('@actions/core');
+const ezSpawn = require('@jsdevtools/ez-spawn');
 
 // Utility method to write the result of execSync to the console.
 const exec = (str) => process.stdout.write(execSync(str));
@@ -13,26 +14,23 @@ const exec = (str) => process.stdout.write(execSync(str));
 const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8').toString());
 
 // Function that prepares the NPM local config for the deployment if the token is set.
-const prepareNPMConfig = async (npmToken) => {
-  if (npmToken) {
-    const registeryURL = process.env.NPM_REGISTRY_URL || 'registry.npmjs.org/';
+const prepareNPMConfig = async () => {
+  const registeryURL = process.env.NPM_REGISTRY_URL || 'registry.npmjs.org/';
 
-    // If the token is not set, attempt to create a config file.
-    // Respect NPM_CONFIG_USERCONFIG if it is provided, default to $HOME/.npmrc
-    const npmUserConfig = process.env.NPM_CONFIG_USERCONFIG || `${os.homedir()}/.npmrc`;
-    let npmStrict = process.env.NPM_STRICT_SSL || true;
-    const npmRegistryScheme = npmStrict ? 'https' : 'http';
+  // If the token is not set, attempt to create a config file.
+  // Respect NPM_CONFIG_USERCONFIG if it is provided, default to $HOME/.npmrc
+  const npmUserConfig = process.env.NPM_CONFIG_USERCONFIG || `${os.homedir()}/.npmrc`;
+  let npmStrict = process.env.NPM_STRICT_SSL || true;
+  const npmRegistryScheme = npmStrict ? 'https' : 'http';
 
-    npmStrict = npmStrict ? 'true' : 'false';
+  npmStrict = npmStrict ? 'true' : 'false';
 
-    console.log(npmUserConfig);
-    fs.writeFileSync(
-      npmUserConfig,
-      `${registeryURL}:_authToken=${npmToken}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}`
-    );
+  fs.writeFileSync(
+    npmUserConfig,
+    `${registeryURL}:_authToken=\${INPUT_TOKEN}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}`
+  );
 
-    fs.chmodSync(npmUserConfig, '600');
-  }
+  fs.chmodSync(npmUserConfig, '600');
 };
 
 // Function that will extract the current version info from the recent commits
@@ -47,6 +45,18 @@ const extractVersion = async () => {
   }
 
   return version;
+};
+
+const publish = async (cwd, token, directory) => {
+  // Run NPM to publish the package
+  await ezSpawn.async('npm', ['publish', directory], {
+    cwd,
+    pipe: true,
+    env: {
+      ...process.env,
+      INPUT_TOKEN: token,
+    },
+  });
 };
 
 const run = async () => {
@@ -93,7 +103,7 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
-    exec(`npm publish ${directory}`);
+    await publish(path.join(process.env.GITHUB_WORKSPACE, directory), input.npm_token, directory);
 
     // Publish tag to GitHub
     await git.addTag(newVersion);
