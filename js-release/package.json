@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.4",
-    "bent": "^7.3.0",
+    "node-fetch": "^2.6.0",
     "simple-git": "^2.2.0"
   }
 }

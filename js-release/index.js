@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const bent = require('bent');
+const fetch = require('node-fetch');
 const git = require('simple-git/promise')();
 const { execSync } = require('child_process');
 const core = require('@actions/core');
@@ -12,17 +12,15 @@ const registryURL = process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.org/
 // Utility method to write the result of execSync to the console.
 const exec = (str) => process.stdout.write(execSync(str));
 
-// Utility method to get information as json from NPM
-const get = bent('json', registryURL, {
-  Authorization: `Bearer ${process.env.NPM_TOKEN}`,
-});
-
 // Event information from the current workflow
 const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8').toString());
 
 // Function that will extract the current version info from the recent commits
 const extractVersion = async (pkg) => {
-  let latest = await get(`${pkg.name}/latest`.replace('%2f', '/'));
+  const response = await fetch(`${registryURL}${pkg.name}/latest`.replace('%2f', '/'), {
+    headers: { Authorization: `Bearer ${process.env.NPM_TOKEN}` },
+  });
+  let latest = await response.json();
 
   let messages;
 
