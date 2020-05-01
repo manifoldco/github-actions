@@ -112,7 +112,7 @@ const run = async () => {
     }
 
     // Update NPM version in package.json
-    const current = execSync(`npm view ${pkg.name} version`).toString();
+    const current = execSync(`npm view ${pkg.name.replace('%2f', '/')} version`).toString();
     exec(`npm version --allow-same-version=true --git-tag-version=false ${current} `);
     console.log('current: ', current, ' / ', 'version: ', version);
     const newVersion = execSync(`npm version --git-tag-version=false ${version}`).toString();
