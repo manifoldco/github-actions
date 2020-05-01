@@ -98,8 +98,6 @@ const run = async () => {
     const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${githubRepo}.git`;
 
     const pkgPath = path.join(process.env.GITHUB_WORKSPACE, directory, 'package.json');
-    console.log(pkgPath);
-    exec('ls pkg');
     // eslint-disable-next-line import/no-dynamic-require,global-require
     const pkg = require(pkgPath);
 
@@ -111,6 +109,11 @@ const run = async () => {
     await git.addRemote(remoteName, remoteRepo);
 
     const version = await extractVersion(pkg);
+
+    // Move into the directory if necessary
+    if (directory !== '') {
+      execSync(`cd ${directory}`);
+    }
 
     // Update NPM version in package.json
     const current = execSync(`npm view ${pkg.name} version`).toString();
