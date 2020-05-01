@@ -51,7 +51,7 @@ const publish = async (cwd, token, directory) => {
   // Run NPM to publish the package
   await ezSpawn.async('npm', ['publish', directory], {
     cwd,
-    pipe: true,
+    stdio: 'pipe',
     env: {
       ...process.env,
       INPUT_TOKEN: token,
