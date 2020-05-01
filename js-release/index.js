@@ -24,19 +24,20 @@ const prepareNPMConfig = async () => {
   if (process.env.NPM_TOKEN) {
     // If the token is not set, attempt to create a config file.
     // Respect NPM_CONFIG_USERCONFIG if it is provided, default to $HOME/.npmrc
-
     const npmUserConfig = process.env.NPM_CONFIG_USERCONFIG || `${os.homedir()}/.npmrc`;
     let npmStrict = process.env.NPM_STRICT_SSL || true;
     const npmRegistryScheme = npmStrict ? 'https' : 'http';
 
     npmStrict = npmStrict ? 'true' : 'false';
 
+    console.log(npmUserConfig);
     fs.writeFileSync(
       npmUserConfig,
       `${registeryURL}:_authToken=${process.env.NPM_TOKEN}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}`
     );
 
     fs.chmodSync(npmUserConfig, '600');
+    exec('cat ' + npmUserConfig);
   }
 };
 
