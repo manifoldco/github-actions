@@ -44,7 +44,7 @@ const prepareNPMConfig = async () => {
 const extractVersion = async (pkg) => {
   let latest;
   try {
-    latest = await get(`${pkg.name}/latest`);
+    latest = await get(`${pkg.name.replace('%2f', '/')}/latest`);
   } catch (e) {
     // unpublished
   }
