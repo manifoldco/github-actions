@@ -34,12 +34,12 @@ const prepareNPMConfig = async () => {
 
     npmStrict = npmStrict ? 'true' : 'false';
 
-    await fs.writeFile(
+    fs.writeFileSync(
       npmUserConfig,
       `${registeryURL}:_authToken=${process.env.NPM_TOKEN}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}`
     );
 
-    await fs.chmod(npmUserConfig, '600');
+    fs.chmodSync(npmUserConfig, '600');
   }
 };
 
