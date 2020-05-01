@@ -7,6 +7,10 @@ inputs:
     description: |-
       The directory to publish within the workspace to NPM if the root directory is not valid. Omit to publish the root directory.
     required: false
+  npm_token:
+    description: |-
+      The token to use for publishing to NPM.
+    required: true
 runs:
   using: node12
   main: dist/index.js

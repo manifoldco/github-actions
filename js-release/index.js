@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const git = require('simple-git/promise')();
@@ -10,6 +11,29 @@ const exec = (str) => process.stdout.write(execSync(str));
 
 // Event information from the current workflow
 const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8').toString());
+
+// Function that prepares the NPM local config for the deployment if the token is set.
+const prepareNPMConfig = async (npmToken) => {
+  if (npmToken) {
+    const registeryURL = process.env.NPM_REGISTRY_URL || 'registry.npmjs.org/';
+
+    // If the token is not set, attempt to create a config file.
+    // Respect NPM_CONFIG_USERCONFIG if it is provided, default to $HOME/.npmrc
+    const npmUserConfig = process.env.NPM_CONFIG_USERCONFIG || `${os.homedir()}/.npmrc`;
+    let npmStrict = process.env.NPM_STRICT_SSL || true;
+    const npmRegistryScheme = npmStrict ? 'https' : 'http';
+
+    npmStrict = npmStrict ? 'true' : 'false';
+
+    console.log(npmUserConfig);
+    fs.writeFileSync(
+      npmUserConfig,
+      `${registeryURL}:_authToken=${npmToken}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}`
+    );
+
+    fs.chmodSync(npmUserConfig, '600');
+  }
+};
 
 // Function that will extract the current version info from the recent commits
 const extractVersion = async () => {
@@ -27,10 +51,13 @@ const extractVersion = async () => {
 
 const run = async () => {
   const input = {
+    npm_token: core.getInput('npm_token'),
     npm_publish_directory: core.getInput('npm_publish_directory'),
   };
 
   try {
+    await prepareNPMConfig(input.npm_token);
+
     const directory = input.npm_publish_directory || '';
     const remoteName = 'releaser';
     const githubActor = process.env.GITHUB_ACTOR;
@@ -66,7 +93,7 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
-    exec(`npm publish ${directory} --access public`);
+    exec(`npm publish ${directory}`);
 
     // Publish tag to GitHub
     await git.addTag(newVersion);
