@@ -2348,7 +2348,6 @@ const prepareNPMConfig = async (token) => {
   );
 
   fs.chmodSync(npmUserConfig, '600');
-  exec(`cat ${npmUserConfig}`);
 };
 
 // Function that will extract the current version info from the recent commits
@@ -2396,10 +2395,6 @@ const run = async () => {
 
     // Get the path to the remote repo for acting there
     const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${githubRepo}.git`;
-
-    execSync('ls');
-    execSync('pwd');
-    console.log(process.env.GITHUB_WORKSPACE);
 
     const pkgPath = path.join(process.env.GITHUB_WORKSPACE, 'package.json');
     // eslint-disable-next-line import/no-dynamic-require,global-require
