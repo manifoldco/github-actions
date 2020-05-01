@@ -104,7 +104,8 @@ const run = async () => {
       'package.json'
     );
     console.log(pkgPath);
-    console.log(fs.lstatSync(process.env.GITHUB_WORKSPACE), process.cwd());
+    console.log(process.cwd());
+    exec('ls');
     // eslint-disable-next-line import/no-dynamic-require,global-require
     const pkg = require(pkgPath);
 
