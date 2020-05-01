@@ -42,7 +42,6 @@ const prepareNPMConfig = async () => {
 
 // Function that will extract the current version info from the recent commits
 const extractVersion = async (pkg) => {
-  console.log(`${pkg.name}/latest`.replace('%2f', '/'));
   let latest = await get(`${pkg.name}/latest`.replace('%2f', '/'));
 
   let messages;
@@ -81,7 +80,7 @@ const run = async () => {
     npm_publish_directory: core.getInput('npm_publish_directory'),
   };
 
-  try {
+  //try {
     await prepareNPMConfig();
 
     const directory = input.npm_publish_directory || '';
@@ -129,10 +128,10 @@ const run = async () => {
     await git.commit(newVersion);
     await git.push(remoteName);
     await git.pushTags(remoteName);
-  } catch (e) {
+  /*} catch (e) {
     console.error(e.message);
     core.setFailed(e.message);
-  }
+  }*/
 };
 
 run();
