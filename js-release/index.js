@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const bent = require('bent');
@@ -61,7 +60,7 @@ const run = async () => {
     npm_publish_directory: core.getInput('npm_publish_directory'),
   };
 
-  //try {
+  try {
     const directory = input.npm_publish_directory || '';
     const remoteName = 'releaser';
     const githubActor = process.env.GITHUB_ACTOR;
@@ -107,10 +106,10 @@ const run = async () => {
     await git.commit(newVersion);
     await git.push(remoteName);
     await git.pushTags(remoteName);
-  /*} catch (e) {
+  } catch (e) {
     console.error(e.message);
     core.setFailed(e.message);
-  }*/
+  }
 };
 
 run();
