@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const bent = require('bent');
@@ -6,11 +7,14 @@ const git = require('simple-git/promise')();
 const { execSync } = require('child_process');
 const core = require('@actions/core');
 
+// URL for the NPM registry, configurable.
+const registeryURL = process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.org/';
+
 // Utility method to write the result of execSync to the console.
 const exec = (str) => process.stdout.write(execSync(str));
 
 // Utility method to get information as json from NPM
-const get = bent('json', process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.org/');
+const get = bent('json', registeryURL);
 
 // Event information from the current workflow
 const event = JSON.parse(fs.readFileSync('/github/workflow/event.json', 'utf8').toString());
@@ -18,7 +22,28 @@ const event = JSON.parse(fs.readFileSync('/github/workflow/event.json', 'utf8').
 // eslint-disable-next-line import/no-dynamic-require
 const pkg = require(path.join(process.cwd(), 'package.json'));
 
-// Method that will extract the current version info from the recent commits
+// Function that prepares the NPM local config for the deployment if the token is set.
+const prepareNPMConfig = async () => {
+  if (process.env.NPM_AUTH_TOKEN) {
+    // If the token is not set, attempt to create a config file.
+    // Respect NPM_CONFIG_USERCONFIG if it is provided, default to $HOME/.npmrc
+
+    const npmUserConfig = process.env.NPM_CONFIG_USERCONFIG || `${os.homedir()}/.npmrc`;
+    let npmStrict = process.env.NPM_STRICT_SSL || true;
+    const npmRegistryScheme = npmStrict ? 'https' : 'http';
+
+    npmStrict = npmStrict ? 'true' : 'false';
+
+    await fs.writeFile(
+      npmUserConfig,
+      `${registeryURL}:_authToken=${process.env.NPM_AUTH_TOKEN}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}`
+    );
+
+    await fs.chmod(npmUserConfig, '600');
+  }
+};
+
+// Function that will extract the current version info from the recent commits
 const extractVersion = async () => {
   let latest;
   try {
@@ -62,6 +87,8 @@ const run = async () => {
   const input = {
     npm_publish_directory: core.getInput('npm_publish_directory'),
   };
+
+  await prepareNPMConfig();
 
   const remoteName = 'releaser';
   const githubActor = process.env.GITHUB_ACTOR;
