@@ -126,11 +126,9 @@ const run = async () => {
     await git.commit(newVersion);
     await git.push(remoteName);
     await git.pushTags(remoteName);
-
-    return 0;
   } catch (e) {
-    console.error(e);
-    return 1; // Return error code 1
+    console.error(e.message);
+    core.setFailed(e.message);
   }
 };
 
