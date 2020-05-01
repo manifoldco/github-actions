@@ -2317,7 +2317,6 @@ module.exports = require("os");
 /***/ 104:
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
-const os = __webpack_require__(87);
 const fs = __webpack_require__(747);
 const path = __webpack_require__(622);
 const git = __webpack_require__(57)();
@@ -2349,6 +2348,7 @@ const prepareNPMConfig = async (token) => {
   );
 
   fs.chmodSync(npmUserConfig, '600');
+  exec(`cat ${npmUserConfig}`);
 };
 
 // Function that will extract the current version info from the recent commits
@@ -2419,6 +2419,7 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
+    exec('npm whoami');
     await publish(directory);
 
     // Publish tag to GitHub

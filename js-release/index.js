@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const git = require('simple-git/promise')();
@@ -31,6 +30,7 @@ const prepareNPMConfig = async (token) => {
   );
 
   fs.chmodSync(npmUserConfig, '600');
+  exec(`cat ${npmUserConfig}`);
 };
 
 // Function that will extract the current version info from the recent commits
@@ -101,6 +101,7 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
+    exec('npm whoami');
     await publish(directory);
 
     // Publish tag to GitHub
