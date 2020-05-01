@@ -97,15 +97,9 @@ const run = async () => {
     // Get the path to the remote repo for acting there
     const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${githubRepo}.git`;
 
-    const pkgPath = path.join(
-      process.env.GITHUB_WORKSPACE,
-      process.env.GITHUB_REPOSITORY,
-      directory,
-      'package.json'
-    );
+    const pkgPath = path.join(process.env.GITHUB_WORKSPACE, directory, 'package.json');
     console.log(pkgPath);
-    console.log(process.cwd());
-    exec('ls');
+    exec('ls pkg');
     // eslint-disable-next-line import/no-dynamic-require,global-require
     const pkg = require(pkgPath);
 
