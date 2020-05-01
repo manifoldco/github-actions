@@ -14,7 +14,7 @@ const exec = (str) => process.stdout.write(execSync(str));
 const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8').toString());
 
 // Function that prepares the NPM local config for the deployment if the token is set.
-const prepareNPMConfig = async () => {
+const prepareNPMConfig = async (token) => {
   const registeryURL = process.env.NPM_REGISTRY_URL || 'registry.npmjs.org/';
 
   // If the token is not set, attempt to create a config file.
@@ -27,7 +27,7 @@ const prepareNPMConfig = async () => {
 
   fs.writeFileSync(
     npmUserConfig,
-    `${registeryURL}:_authToken=\${INPUT_TOKEN}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}`
+    `${registeryURL}:_authToken=${token}\nregistry=${npmRegistryScheme}://${registeryURL}\nstrict-ssl=${npmStrict}`
   );
 
   fs.chmodSync(npmUserConfig, '600');
@@ -47,11 +47,8 @@ const extractVersion = async () => {
   return version;
 };
 
-const publish = async (cwd, token, directory) => {
-  console.log(JSON.stringify({
-    ...process.env,
-    INPUT_TOKEN: token,
-  }));
+const publish = async (cwd, directory) => {
+  console.log(cwd, directory);
 
   // Run NPM to publish the package
   await ezSpawn.async('npm', ['publish', directory], {
@@ -59,7 +56,6 @@ const publish = async (cwd, token, directory) => {
     stdio: 'pipe',
     env: {
       ...process.env,
-      INPUT_TOKEN: token,
     },
   });
 };
@@ -108,7 +104,7 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
-    await publish(path.join(process.env.GITHUB_WORKSPACE, directory), input.npm_token, directory);
+    await publish(path.join(process.env.GITHUB_WORKSPACE, directory), directory);
 
     // Publish tag to GitHub
     await git.addTag(newVersion);
