@@ -2346,7 +2346,7 @@ const exec = (str) => process.stdout.write(execSync(str));
 const get = bent('json', registeryURL);
 
 // Event information from the current workflow
-const event = JSON.parse(fs.readFileSync('/github/workflow/event.json', 'utf8').toString());
+const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8').toString());
 
 // eslint-disable-next-line import/no-dynamic-require
 const pkg = __webpack_require__(731);
