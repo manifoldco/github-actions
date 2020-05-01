@@ -2397,9 +2397,14 @@ const run = async () => {
     // Get the path to the remote repo for acting there
     const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${githubRepo}.git`;
 
-    const pkgPath = path.join(process.env.GITHUB_WORKSPACE, directory, 'package.json');
+    execSync('ls');
+    execSync('pwd');
+    console.log(process.env.GITHUB_WORKSPACE);
+
+    const pkgPath = path.join(process.env.GITHUB_WORKSPACE, 'package.json');
     // eslint-disable-next-line import/no-dynamic-require,global-require
     const pkg = require(pkgPath);
+    console.log(pkg);
 
     // Setup git for the push
     await git.addConfig('http.sslVerify', false);
@@ -2425,6 +2430,7 @@ const run = async () => {
     exec(`echo "::set-output name=version::${newVersion}"`);
 
     // Publish changes to package.json to GitHub
+    await git.add('package.json');
     await git.commit(newVersion);
     await git.push(remoteName);
     await git.pushTags(remoteName);
