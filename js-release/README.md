@@ -21,13 +21,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
+        with:
+          always-auth: true
+          node-version: '12.x'
+          registry-url: https://registry.npmjs.org
+          scope: '@manifoldco' # Replace with your scope
       - run: npm install
       - run: make package
       - uses: manifoldco/github-actions/js-release@gui/npm-releases
         with:
           npm_publish_directory: pkg
     env:
-      NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+      NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
 ```
 

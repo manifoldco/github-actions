@@ -66,7 +66,7 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
-    exec(`npm publish ${directory}`);
+    exec(`npm publish ${directory} --access public`);
 
     // Publish tag to GitHub
     await git.addTag(newVersion);
