@@ -19,7 +19,7 @@ const prepareNPMConfig = async (token) => {
 
   // If the token is not set, attempt to create a config file.
   // Respect NPM_CONFIG_USERCONFIG if it is provided, default to $HOME/.npmrc
-  const npmUserConfig = process.env.NPM_CONFIG_USERCONFIG || `${os.homedir()}/.npmrc`;
+  const npmUserConfig = process.env.NPM_CONFIG_USERCONFIG || '~/.npmrc';
   let npmStrict = process.env.NPM_STRICT_SSL || true;
   const npmRegistryScheme = npmStrict ? 'https' : 'http';
 
@@ -47,12 +47,9 @@ const extractVersion = async () => {
   return version;
 };
 
-const publish = async (cwd, directory) => {
-  console.log(cwd, directory);
-
+const publish = async (directory) => {
   // Run NPM to publish the package
   await ezSpawn.async('npm', ['publish', directory], {
-    cwd,
     stdio: 'pipe',
     env: {
       ...process.env,
@@ -104,7 +101,7 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
-    await publish(path.join(process.env.GITHUB_WORKSPACE, directory), directory);
+    await publish(directory);
 
     // Publish tag to GitHub
     await git.addTag(newVersion);
