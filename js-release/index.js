@@ -49,12 +49,16 @@ const extractVersion = async () => {
 
 const publish = async (directory) => {
   // Run NPM to publish the package
-  await ezSpawn.async('npm', ['publish', directory], {
-    stdio: 'pipe',
-    env: {
-      ...process.env,
-    },
-  });
+  await ezSpawn.async(
+    'npm',
+    ['publish', `--userconfig='${process.env.NPM_CONFIG_USERCONFIG || '~/.npmrc'}'`, directory],
+    {
+      stdio: 'pipe',
+      env: {
+        ...process.env,
+      },
+    }
+  );
 };
 
 const run = async () => {
@@ -101,7 +105,6 @@ const run = async () => {
     console.log('new version:', newVersion);
 
     // Publishes to NPM using a provided directory if any
-    exec('npm whoami');
     await publish(directory);
 
     // Publish tag to GitHub
