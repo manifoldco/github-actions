@@ -2417,43 +2417,50 @@ const run = async () => {
     npm_publish_directory: core.getInput('npm_publish_directory'),
   };
 
-  await prepareNPMConfig();
+  try {
+    await prepareNPMConfig();
 
-  const remoteName = 'releaser';
-  const githubActor = process.env.GITHUB_ACTOR;
-  const githubToken = process.env.GITHUB_TOKEN;
-  const githubRepo = process.env.GITHUB_REPOSITORY;
+    const remoteName = 'releaser';
+    const githubActor = process.env.GITHUB_ACTOR;
+    const githubToken = process.env.GITHUB_TOKEN;
+    const githubRepo = process.env.GITHUB_REPOSITORY;
 
-  // Get the path to the remote repo for acting there
-  const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${githubRepo}.git`;
+    // Get the path to the remote repo for acting there
+    const remoteRepo = `https://${githubActor}:${githubToken}@github.com/${githubRepo}.git`;
 
-  // Setup git for the push
-  await git.addConfig('http.sslVerify', false);
-  await git.addConfig('user.name', 'Auto-Releaser');
-  await git.addConfig('user.email', 'actions@users.noreply.github.com');
+    // Setup git for the push
+    await git.addConfig('http.sslVerify', false);
+    await git.addConfig('user.name', 'Auto-Releaser');
+    await git.addConfig('user.email', 'actions@users.noreply.github.com');
 
-  await git.addRemote(remoteName, remoteRepo);
+    await git.addRemote(remoteName, remoteRepo);
 
-  const version = await extractVersion();
+    const version = await extractVersion();
 
-  // Update NPM version in package.json
-  const current = execSync(`npm view ${pkg.name} version`).toString();
-  exec(`npm version --allow-same-version=true --git-tag-version=false ${current} `);
-  console.log('current: ', current, ' / ', 'version: ', version);
-  const newVersion = execSync(`npm version --git-tag-version=false ${version}`).toString();
-  console.log('new version:', newVersion);
+    // Update NPM version in package.json
+    const current = execSync(`npm view ${pkg.name} version`).toString();
+    exec(`npm version --allow-same-version=true --git-tag-version=false ${current} `);
+    console.log('current: ', current, ' / ', 'version: ', version);
+    const newVersion = execSync(`npm version --git-tag-version=false ${version}`).toString();
+    console.log('new version:', newVersion);
 
-  // Publishes to NPM using a provided directory if any
-  exec(`npm publish ${input.npm_publish_directory ? input.npm_publish_directory : ''}`);
+    // Publishes to NPM using a provided directory if any
+    exec(`npm publish ${input.npm_publish_directory ? input.npm_publish_directory : ''}`);
 
-  // Publish tag to GitHub
-  await git.addTag(newVersion);
-  exec(`echo "::set-output name=version::${newVersion}"`);
+    // Publish tag to GitHub
+    await git.addTag(newVersion);
+    exec(`echo "::set-output name=version::${newVersion}"`);
 
-  // Publish changes to package.json to GitHub
-  await git.commit(newVersion);
-  await git.push(remoteName);
-  await git.pushTags(remoteName);
+    // Publish changes to package.json to GitHub
+    await git.commit(newVersion);
+    await git.push(remoteName);
+    await git.pushTags(remoteName);
+
+    return 0;
+  } catch (e) {
+    console.error(e);
+    return 1; // Return error code 1
+  }
 };
 
 run();
