@@ -2337,13 +2337,15 @@ const { execSync } = __webpack_require__(4);
 const core = __webpack_require__(470);
 
 // URL for the NPM registry, configurable.
-const registeryURL = process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.org/';
+const registryURL = process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.org/';
 
 // Utility method to write the result of execSync to the console.
 const exec = (str) => process.stdout.write(execSync(str));
 
 // Utility method to get information as json from NPM
-const get = bent('json', registeryURL);
+const get = bent('json', registryURL, {
+  Authorization: `Bearer ${process.env.NPM_TOKEN}`,
+});
 
 // Event information from the current workflow
 const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8').toString());
